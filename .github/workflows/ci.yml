@@ -1,0 +1,21 @@
+name: Linux
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install GNU Smalltalk
+      run: |
+        sudo apt-get install gnu-smalltalk
+        gst --version
+    - name: install
+      run: sudo make install
+    - name: tests
+      run: make test

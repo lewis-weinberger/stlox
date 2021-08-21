@@ -1,0 +1,14 @@
+<package>
+  <name>Lox</name>
+  <namespace>Lox</namespace>
+  <url>https://github.com/lewis-weinberger/stlox.git</url>
+
+  <test>
+    <sunit>Lox.ScannerTests</sunit>
+    <filein>tests/ScannerTests.st</filein>
+  </test>
+
+  <filein>src/Lox.st</filein>
+  <filein>src/Token.st</filein>
+  <filein>src/Scanner.st</filein>
+</package>

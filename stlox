@@ -1,0 +1,18 @@
+#!/bin/sh
+"exec" "gst" "-af" "$0" "$@"
+
+| args lox|
+
+args := Smalltalk arguments.
+lox := Lox.Lox new.
+
+args size = 1
+    ifTrue: [ lox runFile: args first ]
+    ifFalse: [
+        args size = 0
+            ifTrue: [ lox runPrompt ]
+            ifFalse: [
+                'Usage: stlox [script]' displayNl.
+                ObjectMemory quit: 64
+            ]
+    ]
