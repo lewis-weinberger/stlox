@@ -53,7 +53,7 @@ There are some Lox examples in the [examples](./examples) subdirectory.
 Following the order in the [book](https://craftinginterpreters.com/contents.html), the following has been implemented so far:
 
 * [x] Scanner
-* [ ] Parser
+* [x] Parser
 * [ ] Interpreter:
     * [ ] Expressions
     * [ ] Statements

@@ -1,7 +1,9 @@
 Object subclass: Lox [
-    | hadError prompt |
+    | prompt |
     <comment: 'My instances are interpreters for the Lox programming language,
 either running programs from source or providing an interactive interpreter.'>
+
+    hadError := false.
 
     Lox class >> new [
         "Answer with a new Lox interpreter"
@@ -13,21 +15,39 @@ either running programs from source or providing an interactive interpreter.'>
         ^x
     ]
 
+    Lox class >> report: aLine where: aLocation message: aMessage [
+        "Print error message"
+
+        <category: 'debugging'>
+        stderr
+            nextPutAll: '[line ', aLine displayString, '] Error' , aLocation , ': ' , aMessage;
+            nl;
+            flush.
+        hadError := true
+    ]
+
     Lox class >> error: aMessage line: aLine [
         "Print message regarding error at given line"
 
         <category: 'debugging'>
-        stderr
-            nextPutAll: '[line ', aLine displayString, '] Error: ', aMessage;
-            nl;
-            flush
+        Lox report: aLine where: '' message: aMessage.
+    ]
+
+    Lox class >> tokenError: aToken message: aMessage [
+        "Print message regarding error for given token"
+
+        <category: 'debugging'>
+        aToken type = #EOF ifTrue: [
+            Lox report: aToken line where: ' at end' message: aMessage.
+        ] ifFalse: [
+            Lox report: aToken line where: (' at ''' , aToken lexeme , '''') message: aMessage.
+        ]
     ]
 
     init [
         "Initialize Lox interpreter"
 
         <category: 'initialization'>
-        hadError := false.
         prompt := '> '
     ]
 
@@ -60,11 +80,15 @@ either running programs from source or providing an interactive interpreter.'>
         "Interpret aString as Lox program"
 
         <category: 'built ins'>
-        | scanner tokens |
+        | scanner tokens parser expression |
         scanner := Scanner source: aString.
         tokens := scanner scanTokens.
 
-        "Currently just print out scanned tokens"
-        tokens do: [ :token | token displayNl ]
+        parser := Parser with: tokens.
+        expression := parser parse.
+
+        hadError ifTrue: [ ^self ].
+
+        (ASTPrinter new print: expression) displayNl
     ]
 ]
