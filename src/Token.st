@@ -23,6 +23,34 @@ Object subclass: Token [
         line := aLine
     ]
 
+    type [
+        "Return the receiver's type"
+
+        <category: 'getter'>
+        ^type
+    ]
+
+    lexeme [
+        "Return the receiver's lexeme"
+
+        <category: 'getter'>
+        ^lexeme
+    ]
+
+    literal [
+        "Return the receiver's literal"
+
+        <category: 'getter'>
+        ^literal
+    ]
+
+    line [
+        "Return the receiver's line"
+
+        <category: 'getter'>
+        ^line
+    ]
+
     displayOn: aStream [
         "Display a representation of the receiver on aStream"
 

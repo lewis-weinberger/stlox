@@ -11,4 +11,6 @@
   <filein>src/Lox.st</filein>
   <filein>src/Token.st</filein>
   <filein>src/Scanner.st</filein>
+  <filein>src/Expr.st</filein>
+  <filein>src/ASTPrinter.st</filein>
 </package>

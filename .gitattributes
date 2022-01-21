@@ -1,1 +1,3 @@
 stlox linguist-language=Smalltalk
+generate_ast linguist-language=Smalltalk
+test_print_ast linguist-language=Smalltalk

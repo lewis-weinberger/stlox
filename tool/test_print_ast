@@ -1,0 +1,15 @@
+#!/bin/sh
+"exec" "gst" "-af" "$0" "$@"
+| expr |
+
+Namespace current: Lox [
+    expr := Binary
+        left: (Unary
+            operator: (Token type: #Minus lexeme: '-' literal: nil line: 1)
+            right: (Literal value: 123))
+        operator: (Token type: #Star lexeme: '*' literal: nil line: 1)
+        right: (Grouping expression: (Literal value: 45.67)).
+
+    (ASTPrinter new print: expr) displayNl
+    "(* (- 123) (group 45.67))"
+]
