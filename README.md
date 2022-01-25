@@ -16,6 +16,8 @@ tar -xvf smalltalk-3.2.91.tar.xz
 cd smalltalk-3.2.91
 
 # compile and install
+export CFLAGS="-no-pie"
+export LDFLAGS="-no-pie"
 ./configure
 make
 make install
