@@ -14,4 +14,6 @@
   <filein>src/Expr.st</filein>
   <filein>src/ASTPrinter.st</filein>
   <filein>src/Parser.st</filein>
+  <filein>src/RuntimeError.st</filein>
+  <filein>src/Interpreter.st</filein>
 </package>

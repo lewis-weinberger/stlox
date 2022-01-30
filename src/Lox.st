@@ -1,9 +1,10 @@
 Object subclass: Lox [
-    | prompt |
+    | prompt interpreter |
     <comment: 'My instances are interpreters for the Lox programming language,
 either running programs from source or providing an interactive interpreter.'>
 
     hadError := false.
+    hadRuntimeError := false.
 
     Lox class >> new [
         "Answer with a new Lox interpreter"
@@ -44,11 +45,26 @@ either running programs from source or providing an interactive interpreter.'>
         ]
     ]
 
+    Lox class >> runtimeError: anError [
+        "Print message regarding runtime error"
+
+        <category: 'debugging'>
+        stderr
+            nextPutAll: anError message;
+            nl;
+            nextPutAll: '[line ', anError token line displayString, ']';
+            nl;
+            flush.
+
+        hadRuntimeError := true.
+    ]
+
     init [
         "Initialize Lox interpreter"
 
         <category: 'initialization'>
-        prompt := '> '
+        prompt := '> '.
+        interpreter := Interpreter new.
     ]
 
     runFile: aPath [
@@ -60,7 +76,8 @@ either running programs from source or providing an interactive interpreter.'>
         src := file upToEnd.
         file close.
         self run: src.
-        hadError ifTrue: [ ObjectMemory quit: 65 ]
+        hadError ifTrue: [ ObjectMemory quit: 65 ].
+        hadRuntimeError ifTrue: [ ObjectMemory quit: 70 ]
     ]
 
     runPrompt [
@@ -89,6 +106,6 @@ either running programs from source or providing an interactive interpreter.'>
 
         hadError ifTrue: [ ^self ].
 
-        (ASTPrinter new print: expression) displayNl
+        interpreter interpret: expression
     ]
 ]

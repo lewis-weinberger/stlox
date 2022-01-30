@@ -57,7 +57,7 @@ Following the order in the [book](https://craftinginterpreters.com/contents.html
 * [x] Scanner
 * [x] Parser
 * [ ] Interpreter:
-    * [ ] Expressions
+    * [x] Expressions
     * [ ] Statements
     * [ ] Control flow
     * [ ] Functions

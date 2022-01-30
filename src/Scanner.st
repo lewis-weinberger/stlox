@@ -158,7 +158,7 @@ converting source text into tokens.'>
 
         self
             addToken: #Number
-            literal: (source copyFrom: start to: current - 1) asNumber
+            literal: (source copyFrom: start to: current - 1) asNumber asFloatD
 
     ]
 
