@@ -12,10 +12,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install GNU Smalltalk
+      env:
+        GST_ARCHIVE: https://alpha.gnu.org/gnu/smalltalk/smalltalk
+        GST_VERSION: 3.2.91
+        CFLAGS: -no-pie
+        LDFLAGS: -no-pie
       run: |
-        sudo apt-get install gnu-smalltalk
+        wget ${GST_ARCHIVE}-${GST_VERSION}.tar.xz
+        tar -xvf smalltalk-${GST_VERSION}.tar.xz
+        cd smalltalk-${GST_VERSION}
+        ./configure
+        make
+        sudo make install
         gst --version
-    - name: install
+    - name: install stlox
       run: sudo make install
-    - name: tests
+    - name: run tests
       run: make test

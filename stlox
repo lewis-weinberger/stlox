@@ -6,6 +6,9 @@
 args := Smalltalk arguments.
 lox := Lox.Lox new.
 
+lox checkGST
+    ifFalse: [ ObjectMemory quit: 64 ].
+
 args size = 1
     ifTrue: [ lox runFile: args first ]
     ifFalse: [

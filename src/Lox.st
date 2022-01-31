@@ -67,6 +67,29 @@ either running programs from source or providing an interactive interpreter.'>
         interpreter := Interpreter new.
     ]
 
+    checkGST [
+        "Check if host GNU Smalltalk has FloatD bug. Printing
+         1.3 raises a ZeroDivide exception if GST is compiled
+         with -pie"
+
+        <category: 'debugging'>
+        ^[ 1.3 asString. true ]
+            on: ZeroDivide
+            do: [ :err |
+                stderr
+                    nl;
+                    nextPutAll: 'The installed version of GNU Smalltalk';
+                    nextPutAll: ' cannot correctly run this Lox interpreter.';
+                    nl;
+                    nextPutAll: 'Please recompile with CFLAGS="-no-pie" as';
+                    nextPutAll: ' suggested here: https://stackoverflow.com';
+                    nextPutAll: '/a/66287359';
+                    nl;
+                    flush.
+                err return: false
+            ]
+    ]
+
     runFile: aPath [
         "Run the interpreter on the provided source file at aPath"
 
