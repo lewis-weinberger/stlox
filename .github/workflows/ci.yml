@@ -18,6 +18,7 @@ jobs:
         CFLAGS: -no-pie
         LDFLAGS: -no-pie
       run: |
+        sudo apt-get install libffi7 libgmp10 libltdl7 libreadline8 libsigsev2 libgnutls30
         wget ${GST_ARCHIVE}-${GST_VERSION}.tar.xz
         tar -xvf smalltalk-${GST_VERSION}.tar.xz
         cd smalltalk-${GST_VERSION}
