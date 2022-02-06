@@ -120,15 +120,15 @@ either running programs from source or providing an interactive interpreter.'>
         "Interpret aString as Lox program"
 
         <category: 'built ins'>
-        | scanner tokens parser expression |
+        | scanner tokens parser statements |
         scanner := Scanner source: aString.
         tokens := scanner scanTokens.
 
         parser := Parser with: tokens.
-        expression := parser parse.
+        statements := parser parse.
 
         hadError ifTrue: [ ^self ].
 
-        interpreter interpret: expression
+        interpreter interpret: statements
     ]
 ]

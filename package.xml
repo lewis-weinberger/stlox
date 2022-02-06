@@ -12,8 +12,10 @@
   <filein>src/Token.st</filein>
   <filein>src/Scanner.st</filein>
   <filein>src/Expr.st</filein>
+  <filein>src/Stmt.st</filein>
   <filein>src/ASTPrinter.st</filein>
   <filein>src/Parser.st</filein>
   <filein>src/RuntimeError.st</filein>
+  <filein>src/Environment.st</filein>
   <filein>src/Interpreter.st</filein>
 </package>

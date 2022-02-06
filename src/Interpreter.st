@@ -1,11 +1,29 @@
 Object subclass: Interpreter [
+    | environment |
     <comment: 'My instances are evaluators for the Lox programming language.'>
 
-    interpret: expr [
-        "Interpret Lox expression"
+    Interpreter class >> new [
+        "Answer with a new Lox interpeter"
 
-        <category: 'evalutation'>
-        [ (self stringify: (self evaluate: expr)) displayNl ]
+        <category: 'instance creation'>
+        | x |
+        x := super new.
+        x init.
+        ^x
+    ]
+
+    init [
+        "Initialize the interpreter environment"
+
+        <category: 'initialization'>
+        environment := Environment new.
+    ]
+
+    interpret: statements [
+        "Interpret a list of Lox statements"
+
+        <category: 'evaluation'>
+        [ statements do: [ :statement | self execute: statement ] ]
             on: RuntimeError
             do: [ :err |
                 Lox runtimeError: err.
@@ -29,6 +47,26 @@ Object subclass: Interpreter [
         ].
 
         ^anObject displayString
+    ]
+
+    execute: stmt [
+        "Send back to statement for appropriate visitor method"
+
+        <category: 'evaluation'>
+        ^stmt accept: self.
+    ]
+
+    executeBlock: statements environment: anEnvironment [
+        "Execute block of statements"
+
+        <category: 'evaluation'>
+        | previous |
+        previous := environment.
+        [
+            environment := anEnvironment.
+            statements do: [ :statement | self execute: statement ].
+        ]
+            ensure: [ environment := previous ].
     ]
 
     evaluate: expr [
@@ -75,22 +113,71 @@ Object subclass: Interpreter [
                 message: 'Operands must be numbers.'
         ]
     ]
-    
-    visitLiteral: expr [
+
+    visitBlockStmt: stmt [
+        "Evaluate a block of statements"
+
+        <category: 'evaluation'>
+        self
+            executeBlock: stmt statements
+            environment: (Environment enclosing: environment).
+        ^nil.
+    ]
+
+    visitExpressionStmt: stmt [
+        "Evaluate an expression statement"
+
+        <category: 'evaluation'>
+        self evaluate: stmt expression.
+    ]
+
+    visitPrintStmt: stmt [
+        "Evaluate a print statement"
+
+        <category: 'evaluation'>
+        | value |
+        value := self evaluate: stmt expression.
+        (self stringify: value) displayNl.
+    ]
+
+    visitVarStmt: stmt [
+        "Evaluate a variable declaration statement"
+
+        <category: 'evaluation'>
+        | value |
+        value := nil.
+        stmt initializer ifNotNil: [
+            value := self evaluate: stmt initializer
+        ].
+        environment define: (stmt name lexeme) value: value.
+        ^nil.
+    ]
+
+    visitAssignExpr: expr [
+        "Evaluate a variable assignment expression"
+
+        <category: 'evaluation'>
+        | value |
+        value := self evaluate: expr value.
+        environment assign: expr name value: value.
+        ^value.
+    ]
+
+    visitLiteralExpr: expr [
         "Evaluate a literal expression"
 
         <category: 'evaluation'>
         ^expr value.
     ]
 
-    visitGrouping: expr [
+    visitGroupingExpr: expr [
         "Evaluate a grouping expression"
 
         <category: 'evaluation'>
         ^self evaluate: expr expression.
     ]
 
-    visitUnary: expr [
+    visitUnaryExpr: expr [
         "Evaluate a unary expression"
 
         <category: 'evaluation'>
@@ -109,7 +196,14 @@ Object subclass: Interpreter [
         ^nil
     ]
 
-    visitBinary: expr [
+    visitVariableExpr: expr [
+        "Evaluate a variable expression"
+
+        <category: 'evaluation'>
+        ^environment get: expr name.
+    ]
+
+    visitBinaryExpr: expr [
         "Evaluate a binary expression"
 
         <category: 'evaluation'>

@@ -20,10 +20,19 @@ class code for different types of node in the Lox abstract syntax tree'>
         self
             defineAST: outputDir
             base: 'Expr'
-            types: #('Binary: left operator right'
+            types: #('Assign: name value'
+                     'Binary: left operator right'
                      'Grouping: expression'
                      'Literal: value'
-                     'Unary: operator right').
+                     'Unary: operator right'
+                     'Variable: name').
+        self
+            defineAST: outputDir
+            base: 'Stmt'
+            types: #('Block: statements'
+                     'Expression: expression'
+                     'Print: expression'
+                     'Var: name initializer').
     ]
 
     defineAST: outputDir base: baseName types: typeList [
@@ -71,14 +80,14 @@ class code for different types of node in the Lox abstract syntax tree'>
         writer
             nl;
             nl;
-            nextPutAll: baseName , ' subclass: ' , className , ' [';
+            nextPutAll: baseName , ' subclass: ' , baseName , className , ' [';
             nl;
             space: 4;
             nextPutAll: '|' , fieldList , ' |';
             nl;
             nl;
             space: 4;
-            nextPutAll: className , ' class >> '.
+            nextPutAll: baseName , className , ' class >> '.
 
         fields do: [ :field |
             writer nextPutAll: field , ': ' , (capitals at: field) , ' '.
@@ -145,7 +154,7 @@ class code for different types of node in the Lox abstract syntax tree'>
             nextPutAll: 'accept: aVisitor [';
             nl;
             space: 8;
-            nextPutAll: '^aVisitor visit' , className , ': self.';
+            nextPutAll: '^aVisitor visit' , className , baseName , ': self.';
             nl;
             space: 4;
             nextPutAll: ']';

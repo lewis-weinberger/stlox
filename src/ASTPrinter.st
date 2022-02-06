@@ -8,7 +8,7 @@ Object subclass: ASTPrinter [
         ^anExpression accept: self
     ]
 
-    visitBinary: aBinary [
+    visitBinaryExpr: aBinary [
         "Handle the case of binary expressions"
 
         <category: 'printing'>
@@ -18,7 +18,7 @@ Object subclass: ASTPrinter [
             with: (aBinary right).
     ]
 
-    visitGrouping: aGrouping [
+    visitGroupingExpr: aGrouping [
         "Handle the case of group expressions"
 
         <category: 'printing'>
@@ -28,7 +28,7 @@ Object subclass: ASTPrinter [
             with: nil.
     ]
 
-    visitLiteral: aLiteral [
+    visitLiteralExpr: aLiteral [
         "Handle the case of literal expressions"
 
         <category: 'printing'>
@@ -36,7 +36,7 @@ Object subclass: ASTPrinter [
         ^aLiteral value displayString
     ]
 
-    visitUnary: aUnary [
+    visitUnaryExpr: aUnary [
         "Handle the case of unary expressions"
 
         <category: 'printing'>

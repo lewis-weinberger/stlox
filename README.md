@@ -58,7 +58,7 @@ Following the order in the [book](https://craftinginterpreters.com/contents.html
 * [x] Parser
 * [ ] Interpreter:
     * [x] Expressions
-    * [ ] Statements
+    * [x] Statements
     * [ ] Control flow
     * [ ] Functions
     * [ ] Variable binding

@@ -4,10 +4,46 @@ Object subclass: Expr [
     <comment: 'My instances represent expressions in the Lox abstract syntax tree.'>
 ]
 
-Expr subclass: Binary [
+Expr subclass: ExprAssign [
+    | name value |
+
+    ExprAssign class >> name: aName value: aValue [
+        <category: 'instance creation'>
+        ^self new
+            name: aName;
+            value: aValue;
+            yourself.
+    ]
+
+    name: aName [
+        <category: 'setter'>
+        name := aName.
+    ]
+
+    name [
+        <category: 'getter'>
+        ^name.
+    ]
+
+    value: aValue [
+        <category: 'setter'>
+        value := aValue.
+    ]
+
+    value [
+        <category: 'getter'>
+        ^value.
+    ]
+
+    accept: aVisitor [
+        ^aVisitor visitAssignExpr: self.
+    ]
+]
+
+Expr subclass: ExprBinary [
     | left operator right |
 
-    Binary class >> left: aLeft operator: anOperator right: aRight [
+    ExprBinary class >> left: aLeft operator: anOperator right: aRight [
         <category: 'instance creation'>
         ^self new
             left: aLeft;
@@ -47,14 +83,14 @@ Expr subclass: Binary [
     ]
 
     accept: aVisitor [
-        ^aVisitor visitBinary: self.
+        ^aVisitor visitBinaryExpr: self.
     ]
 ]
 
-Expr subclass: Grouping [
+Expr subclass: ExprGrouping [
     | expression |
 
-    Grouping class >> expression: anExpression [
+    ExprGrouping class >> expression: anExpression [
         <category: 'instance creation'>
         ^self new
             expression: anExpression;
@@ -72,14 +108,14 @@ Expr subclass: Grouping [
     ]
 
     accept: aVisitor [
-        ^aVisitor visitGrouping: self.
+        ^aVisitor visitGroupingExpr: self.
     ]
 ]
 
-Expr subclass: Literal [
+Expr subclass: ExprLiteral [
     | value |
 
-    Literal class >> value: aValue [
+    ExprLiteral class >> value: aValue [
         <category: 'instance creation'>
         ^self new
             value: aValue;
@@ -97,14 +133,14 @@ Expr subclass: Literal [
     ]
 
     accept: aVisitor [
-        ^aVisitor visitLiteral: self.
+        ^aVisitor visitLiteralExpr: self.
     ]
 ]
 
-Expr subclass: Unary [
+Expr subclass: ExprUnary [
     | operator right |
 
-    Unary class >> operator: anOperator right: aRight [
+    ExprUnary class >> operator: anOperator right: aRight [
         <category: 'instance creation'>
         ^self new
             operator: anOperator;
@@ -133,6 +169,31 @@ Expr subclass: Unary [
     ]
 
     accept: aVisitor [
-        ^aVisitor visitUnary: self.
+        ^aVisitor visitUnaryExpr: self.
+    ]
+]
+
+Expr subclass: ExprVariable [
+    | name |
+
+    ExprVariable class >> name: aName [
+        <category: 'instance creation'>
+        ^self new
+            name: aName;
+            yourself.
+    ]
+
+    name: aName [
+        <category: 'setter'>
+        name := aName.
+    ]
+
+    name [
+        <category: 'getter'>
+        ^name.
+    ]
+
+    accept: aVisitor [
+        ^aVisitor visitVariableExpr: self.
     ]
 ]

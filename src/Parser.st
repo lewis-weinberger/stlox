@@ -91,7 +91,7 @@ the Lox programming language.'>
         | next |
         self advance.
 
-        self isAtEnd whileFalse: [
+        [ self isAtEnd ] whileFalse: [
             self previous type = #Semicolon ifTrue: [ ^self ].
 
             (#(#Class #Fun #Var #For #If #While #Print #Return) includes: self peek type)
@@ -115,19 +115,108 @@ the Lox programming language.'>
     ]
     
     parse [
-        "Begin parsing the tokens"
+        "Parse the source tokens into a list of statements"
 
         <category: 'built ins'>
-        [ ^self expression ]
+        | statements |
+        statements := OrderedCollection new.
+        [ self isAtEnd ] whileFalse: [ statements add: self declaration ].
+        ^statements.
+    ]
+
+    declaration [
+        "Grammar rule for a declaration"
+
+        <category: 'rule'>
+        [
+            (self match: #(#Var)) ifTrue: [ ^self varDeclaration ].
+            ^self statement.
+        ]
             on: ParseError
-            do: [ :sig | sig return ]
+            do: [ :err | self synchronize. err return ].
+    ]
+
+    varDeclaration [
+        "Grammar rule for a variable declaration"
+
+        <category: 'rule'>
+        | name initializer |
+        name := self consume: #Identifier expect: 'Expect variable name.'.
+        initializer := nil.
+        (self match: #(#Equal)) ifTrue: [ initializer := self expression ].
+        self consume: #Semicolon expect: 'Expect '';'' after variable declaration'.
+        ^StmtVar name: name initializer: initializer
+    ]
+
+    statement [
+        "Grammar rule for a statement"
+
+        <category: 'rule'>
+        (self match: #(#Print)) ifTrue: [ ^self printStatement ].
+        (self match: #(#LeftBrace)) ifTrue: [ ^StmtBlock statements: self block ].
+        ^self expressionStatement.
+    ]
+
+    printStatement [
+        "Grammar rule for a print statement"
+
+        <category: 'rule'>
+        | value |
+        value := self expression.
+        self consume: #Semicolon expect: 'Expect '';'' after value.'.
+        ^StmtPrint expression: value.
+    ]
+
+    expressionStatement [
+        "Grammar rule for an expression statement"
+
+        <category: 'rule'>
+        | expr |
+        expr := self expression.
+        self consume: #Semicolon expect: 'Expect '';'' after expression.'.
+        ^StmtExpression expression: expr.
+    ]
+
+    block [
+        "Grammar rule for a block"
+
+        <category: 'rule'>
+        | statements |
+        statements := OrderedCollection new.
+        [ ((self check: #RightBrace) not) & (self isAtEnd not) ] whileTrue: [
+            statements add: self declaration.
+        ].
+        self consume: #RightBrace expect: 'Expect ''}'' after block.'.
+        ^statements.
     ]
 
     expression [
         "Grammar rule for an expression"
 
         <category: 'rule'>
-        ^self equality.
+        ^self assignment.
+    ]
+
+    assignment [
+        "Grammar rule for an assignment"
+
+        <category: 'rule'>
+        | expr equals value name |
+        expr := self equality.
+
+        (self match: #(#Equal)) ifTrue: [
+            equals := self previous.
+            value := self assignment.
+
+            (expr class = ExprVariable) ifTrue: [
+                name := expr name.
+                ^ExprAssign name: name value: value.
+            ].
+
+            Lox tokenError: equals message: 'Invalid assignment target'.
+        ].
+
+        ^expr.
     ]
 
     equality [
@@ -139,7 +228,7 @@ the Lox programming language.'>
         [ self match: #(#BangEqual #EqualEqual) ] whileTrue: [
             operator := self previous.
             right := self comparison.
-            expr := Binary left: expr operator: operator right: right
+            expr := ExprBinary left: expr operator: operator right: right
         ].
         ^expr.
     ]
@@ -153,7 +242,7 @@ the Lox programming language.'>
         [ self match: #(#Greater #GreaterEqual #Less #LessEqual) ] whileTrue: [
             operator := self previous.
             right := self term.
-            expr := Binary left: expr operator: operator right: right
+            expr := ExprBinary left: expr operator: operator right: right
         ].
         ^expr.
     ]
@@ -167,7 +256,7 @@ the Lox programming language.'>
         [ self match: #(#Minus #Plus) ] whileTrue: [
             operator := self previous.
             right := self factor.
-            expr := Binary left: expr operator: operator right: right
+            expr := ExprBinary left: expr operator: operator right: right
         ].
         ^expr.
     ]
@@ -181,7 +270,7 @@ the Lox programming language.'>
         [ self match: #(#Slash #Star) ] whileTrue: [
             operator := self previous.
             right := self unary.
-            expr := Binary left: expr operator: operator right: right
+            expr := ExprBinary left: expr operator: operator right: right
         ].
         ^expr.
     ]
@@ -194,7 +283,7 @@ the Lox programming language.'>
         (self match: #(#Bang #Minus)) ifTrue: [
             operator := self previous.
             right := self unary.
-            ^Unary operator: operator right: right
+            ^ExprUnary operator: operator right: right
         ].
         ^self primary.
     ]
@@ -204,18 +293,22 @@ the Lox programming language.'>
 
         <category: 'rule'>
         | expr |
-        (self match: #(#False)) ifTrue: [ ^Literal value: false ].
-        (self match: #(#True)) ifTrue: [ ^Literal value: true ].
-        (self match: #(#Nil)) ifTrue: [ ^Literal value: nil ].
+        (self match: #(#False)) ifTrue: [ ^ExprLiteral value: false ].
+        (self match: #(#True)) ifTrue: [ ^ExprLiteral value: true ].
+        (self match: #(#Nil)) ifTrue: [ ^ExprLiteral value: nil ].
         
         (self match: #(#Number #String)) ifTrue: [
-            ^Literal value: (self previous literal)
+            ^ExprLiteral value: (self previous literal)
         ].
-        
+
+        (self match: #(#Identifier)) ifTrue: [
+            ^ExprVariable name: (self previous)
+        ].
+
         (self match: #(#LeftParen)) ifTrue: [
             expr := self expression.
             self consume: #RightParen expect: 'Expect '')'' after expression'.
-            ^Grouping expression: expr
+            ^ExprGrouping expression: expr
         ].
         
         ^ParseError error: (self peek) message: 'Expected expression'.
