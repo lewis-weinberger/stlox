@@ -54,6 +54,53 @@ Stmt subclass: StmtExpression [
     ]
 ]
 
+Stmt subclass: StmtIf [
+    | condition thenBranch elseBranch |
+
+    StmtIf class >> condition: aCondition thenBranch: aThenBranch elseBranch: anElseBranch [
+        <category: 'instance creation'>
+        ^self new
+            condition: aCondition;
+            thenBranch: aThenBranch;
+            elseBranch: anElseBranch;
+            yourself.
+    ]
+
+    condition: aCondition [
+        <category: 'setter'>
+        condition := aCondition.
+    ]
+
+    condition [
+        <category: 'getter'>
+        ^condition.
+    ]
+
+    thenBranch: aThenBranch [
+        <category: 'setter'>
+        thenBranch := aThenBranch.
+    ]
+
+    thenBranch [
+        <category: 'getter'>
+        ^thenBranch.
+    ]
+
+    elseBranch: anElseBranch [
+        <category: 'setter'>
+        elseBranch := anElseBranch.
+    ]
+
+    elseBranch [
+        <category: 'getter'>
+        ^elseBranch.
+    ]
+
+    accept: aVisitor [
+        ^aVisitor visitIfStmt: self.
+    ]
+]
+
 Stmt subclass: StmtPrint [
     | expression |
 
@@ -112,5 +159,41 @@ Stmt subclass: StmtVar [
 
     accept: aVisitor [
         ^aVisitor visitVarStmt: self.
+    ]
+]
+
+Stmt subclass: StmtWhile [
+    | condition body |
+
+    StmtWhile class >> condition: aCondition body: aBody [
+        <category: 'instance creation'>
+        ^self new
+            condition: aCondition;
+            body: aBody;
+            yourself.
+    ]
+
+    condition: aCondition [
+        <category: 'setter'>
+        condition := aCondition.
+    ]
+
+    condition [
+        <category: 'getter'>
+        ^condition.
+    ]
+
+    body: aBody [
+        <category: 'setter'>
+        body := aBody.
+    ]
+
+    body [
+        <category: 'getter'>
+        ^body.
+    ]
+
+    accept: aVisitor [
+        ^aVisitor visitWhileStmt: self.
     ]
 ]

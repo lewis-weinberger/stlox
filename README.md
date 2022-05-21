@@ -59,11 +59,12 @@ Following the order in the [book](https://craftinginterpreters.com/contents.html
 * [ ] Interpreter:
     * [x] Expressions
     * [x] Statements
-    * [ ] Control flow
+    * [x] Control flow
     * [ ] Functions
     * [ ] Variable binding
     * [ ] Classes
     * [ ] Inheritance
+* [ ] Tests
 
 ## License
 

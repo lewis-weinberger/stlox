@@ -65,9 +65,9 @@ Object subclass: Environment [
             values at: aName lexeme put: aValue.
             ^aValue.
         ].
-        
+
         enclosing ifNotNil: [ ^enclosing assign: aName value: aValue ].
-        
+
         ^RuntimeError
             error: aName
             message: 'Undefined variable ''' , aName lexeme , '''.'.

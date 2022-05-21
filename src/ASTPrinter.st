@@ -53,7 +53,7 @@ Object subclass: ASTPrinter [
         | str |
         str := WriteStream on: String new.
 
-        str 
+        str
             nextPutAll: '(' , aName;
             nextPutAll: ' ' , (first accept: self).
         second ifNotNil: [ str nextPutAll: ' ' , (second accept: self) ].

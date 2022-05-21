@@ -131,6 +131,20 @@ Object subclass: Interpreter [
         self evaluate: stmt expression.
     ]
 
+    visitIfStmt: stmt [
+        "Evaluate an if statement"
+
+        <category: 'evaluation'>
+        (self isTruthy: (self evaluate: stmt condition)) ifTrue: [
+            self execute: stmt thenBranch
+        ] ifFalse: [
+            stmt elseBranch ifNotNil: [
+                self execute: stmt elseBranch
+            ]
+        ].
+        ^nil.
+    ]
+
     visitPrintStmt: stmt [
         "Evaluate a print statement"
 
@@ -153,6 +167,16 @@ Object subclass: Interpreter [
         ^nil.
     ]
 
+    visitWhileStmt: stmt [
+        "Evaluate a while statement"
+
+        <category: 'evaluation'>
+        [ self isTruthy: (self evaluate: stmt condition) ] whileTrue: [
+            self execute: stmt body
+        ].
+        ^nil.
+    ]
+
     visitAssignExpr: expr [
         "Evaluate a variable assignment expression"
 
@@ -170,6 +194,22 @@ Object subclass: Interpreter [
         ^expr value.
     ]
 
+    visitLogicalExpr: expr [
+        "Evaluate a logical expression"
+
+        <category: 'evaluation'>
+        | left operator type|
+        left := self evaluate: expr left.
+        operator := expr operator.
+        type := operator type.
+        type = #Or ifTrue: [
+            (self isTruthy: left) ifTrue: [ ^left ]
+        ] ifFalse: [
+            (self isTruthy: left) ifFalse: [ ^left ]
+        ].
+        ^self evaluate: expr right.
+    ]
+
     visitGroupingExpr: expr [
         "Evaluate a grouping expression"
 
@@ -185,13 +225,13 @@ Object subclass: Interpreter [
         right := self evaluate: expr right.
         operator := expr operator.
         type := operator type.
-        
+
         type = #Bang ifTrue: [ ^self isTruthy: right not ].
         type = #Minus ifTrue: [
             self checkNumber: operator operand: right.
             ^right negated
         ].
-        
+
         "Unreachable"
         ^nil
     ]
@@ -237,13 +277,13 @@ Object subclass: Interpreter [
         ].
         type = #Plus ifTrue: [
             ((left respondsTo: #+) & (right respondsTo: #+)) ifTrue: [
-                ^left + right 
+                ^left + right
             ].
 
             ((left respondsTo: #,) & (right respondsTo: #,)) ifTrue: [
-                ^left , right 
+                ^left , right
             ].
-            
+
             ^RuntimeError
                 error: expr operator
                 message: 'Operands must be two numbers or two strings.'
@@ -256,8 +296,8 @@ Object subclass: Interpreter [
             self checkNumber: operator left: left right: right.
             ^left * right
         ].
-        
+
         "Unreachable"
-        ^nil 
+        ^nil
     ]
 ]

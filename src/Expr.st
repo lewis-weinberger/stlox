@@ -137,6 +137,53 @@ Expr subclass: ExprLiteral [
     ]
 ]
 
+Expr subclass: ExprLogical [
+    | left operator right |
+
+    ExprLogical class >> left: aLeft operator: anOperator right: aRight [
+        <category: 'instance creation'>
+        ^self new
+            left: aLeft;
+            operator: anOperator;
+            right: aRight;
+            yourself.
+    ]
+
+    left: aLeft [
+        <category: 'setter'>
+        left := aLeft.
+    ]
+
+    left [
+        <category: 'getter'>
+        ^left.
+    ]
+
+    operator: anOperator [
+        <category: 'setter'>
+        operator := anOperator.
+    ]
+
+    operator [
+        <category: 'getter'>
+        ^operator.
+    ]
+
+    right: aRight [
+        <category: 'setter'>
+        right := aRight.
+    ]
+
+    right [
+        <category: 'getter'>
+        ^right.
+    ]
+
+    accept: aVisitor [
+        ^aVisitor visitLogicalExpr: self.
+    ]
+]
+
 Expr subclass: ExprUnary [
     | operator right |
 

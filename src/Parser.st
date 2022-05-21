@@ -113,7 +113,7 @@ the Lox programming language.'>
         ].
         ^false.
     ]
-    
+
     parse [
         "Parse the source tokens into a list of statements"
 
@@ -152,9 +152,71 @@ the Lox programming language.'>
         "Grammar rule for a statement"
 
         <category: 'rule'>
+        (self match: #(#For)) ifTrue: [ ^self forStatement ].
+        (self match: #(#If)) ifTrue: [ ^self ifStatement ].
         (self match: #(#Print)) ifTrue: [ ^self printStatement ].
+        (self match: #(#While)) ifTrue: [ ^self whileStatement ].
         (self match: #(#LeftBrace)) ifTrue: [ ^StmtBlock statements: self block ].
         ^self expressionStatement.
+    ]
+
+    forStatement [
+        "Grammar rule for desugaring a for statement"
+
+        <category: 'rule'>
+        | ini cond incr body stmts |
+        self consume: #LeftParen expect: 'Expect ''('' after ''for''.'.
+
+        (self match: #(#Semicolon)) ifTrue: [ ini := nil ].
+        (self match: #(#Var)) ifTrue: [ 
+            ini := self varDeclaration
+        ] ifFalse: [
+            ini := self expressionStatement
+        ].
+
+        cond := nil.
+        (self check: #Semicolon) ifFalse: [ cond := self expression ].
+        self consume: #Semicolon expect: 'Expect '';'' after loop condition.'.
+
+        incr := nil.
+        (self check: #RightParen) ifFalse: [ incr := self expression ].
+        self consume: #RightParen expect: 'Expect '')'' after for clauses.'.
+        body := self statement.
+
+        incr ifNotNil: [
+            stmts := OrderedCollection new.
+            stmts
+                add: body;
+                add: (StmtExpression expression: incr).
+            body := StmtBlock statements: stmts
+        ].
+
+        cond ifNil: [ cond := ExprLiteral value: true ].
+        body := StmtWhile condition: cond body: body.
+
+        ini ifNotNil: [
+            stmts := OrderedCollection new.
+            stmts
+                add: ini;
+                add: body.
+            body := StmtBlock statements: stmts
+        ].
+
+        ^body.
+    ]
+
+    ifStatement [
+        "Grammar rule for an if statement"
+
+        <category: 'rule'>
+        | cond then else |
+        self consume: #LeftParen expect: 'Expect ''('' after ''if''.'.
+        cond := self expression.
+        self consume: #RightParen expect: 'Expect '')'' after if condition.'.
+        then := self statement.
+        else := nil.
+        (self match: #(#Else)) ifTrue: [ else := self statement ].
+        ^StmtIf condition: cond thenBranch: then elseBranch: else.
     ]
 
     printStatement [
@@ -165,6 +227,18 @@ the Lox programming language.'>
         value := self expression.
         self consume: #Semicolon expect: 'Expect '';'' after value.'.
         ^StmtPrint expression: value.
+    ]
+
+    whileStatement [
+        "Grammar rule for a while statement"
+
+        <category: 'rule'>
+        | cond body |
+        self consume: #LeftParen expect: 'Expect ''('' after ''while''.'.
+        cond := self expression.
+        self consume: #RightParen expect: 'Expect '')'' after condition.'.
+        body := self statement.
+        ^StmtWhile condition: cond body: body.
     ]
 
     expressionStatement [
@@ -202,7 +276,7 @@ the Lox programming language.'>
 
         <category: 'rule'>
         | expr equals value name |
-        expr := self equality.
+        expr := self or.
 
         (self match: #(#Equal)) ifTrue: [
             equals := self previous.
@@ -216,6 +290,36 @@ the Lox programming language.'>
             Lox tokenError: equals message: 'Invalid assignment target'.
         ].
 
+        ^expr.
+    ]
+
+    or [
+        "Grammar rule for an or expression"
+
+        <category: 'rule'>
+        | expr operator right |
+        expr := self and.
+
+        [ self match: #(#Or) ] whileTrue: [
+            operator := self previous.
+            right := self and.
+            expr := ExprLogical left: expr operator: operator right: right
+        ].
+        ^expr.
+    ]
+
+    and [
+        "Grammar rule for an and expression"
+
+        <category: 'rule'>
+        | expr operator right |
+        expr := self equality.
+
+        [ self match: #(#And) ] whileTrue: [
+            operator := self previous.
+            right := self equality.
+            expr := ExprLogical left: expr operator: operator right: right
+        ].
         ^expr.
     ]
 
@@ -296,7 +400,7 @@ the Lox programming language.'>
         (self match: #(#False)) ifTrue: [ ^ExprLiteral value: false ].
         (self match: #(#True)) ifTrue: [ ^ExprLiteral value: true ].
         (self match: #(#Nil)) ifTrue: [ ^ExprLiteral value: nil ].
-        
+
         (self match: #(#Number #String)) ifTrue: [
             ^ExprLiteral value: (self previous literal)
         ].
@@ -310,7 +414,7 @@ the Lox programming language.'>
             self consume: #RightParen expect: 'Expect '')'' after expression'.
             ^ExprGrouping expression: expr
         ].
-        
+
         ^ParseError error: (self peek) message: 'Expected expression'.
     ]
 ]
