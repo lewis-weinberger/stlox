@@ -168,7 +168,7 @@ the Lox programming language.'>
         self consume: #LeftParen expect: 'Expect ''('' after ''for''.'.
 
         (self match: #(#Semicolon)) ifTrue: [ ini := nil ].
-        (self match: #(#Var)) ifTrue: [ 
+        (self match: #(#Var)) ifTrue: [
             ini := self varDeclaration
         ] ifFalse: [
             ini := self expressionStatement
@@ -389,7 +389,49 @@ the Lox programming language.'>
             right := self unary.
             ^ExprUnary operator: operator right: right
         ].
-        ^self primary.
+        ^self call.
+    ]
+
+    finishCall: callee [
+        "Helper to parse function arguments"
+
+        <category: 'helper'>
+        | arguments paren |
+        arguments := OrderedCollection new.
+        (self check: #RightParen) ifFalse: [
+            arguments add: (self expression).
+            [ self match: #(#Comma) ] whileTrue: [
+                ((arguments size) >= 255) ifTrue: [
+                    ^ParseError
+                        error: (self peek)
+                        message: 'Can''t have more than 255 arguments'
+                ].
+                arguments add: (self expression)
+            ]
+        ].
+
+        paren := self
+            consume: #RightParen
+            expect: 'Expect '')'' after arguments.'.
+        ^ExprCall callee: callee paren: paren arguments: arguments.
+    ]
+
+    call [
+        "Grammar rule for a function call"
+
+        <category: 'rule'>
+        | expr done |
+        expr := self primary.
+        done := false.
+        [ done ] whileFalse: [
+            (self match: #(#LeftParen)) ifTrue: [
+                expr := self finishCall: expr
+            ] ifFalse: [
+                done := true
+            ]
+        ].
+
+        ^expr.
     ]
 
     primary [

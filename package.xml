@@ -17,5 +17,6 @@
   <filein>src/Parser.st</filein>
   <filein>src/RuntimeError.st</filein>
   <filein>src/Environment.st</filein>
+  <filein>src/Callable.st</filein>
   <filein>src/Interpreter.st</filein>
 </package>

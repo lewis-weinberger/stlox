@@ -87,6 +87,53 @@ Expr subclass: ExprBinary [
     ]
 ]
 
+Expr subclass: ExprCall [
+    | callee paren arguments |
+
+    ExprCall class >> callee: aCallee paren: aParen arguments: anArguments [
+        <category: 'instance creation'>
+        ^self new
+            callee: aCallee;
+            paren: aParen;
+            arguments: anArguments;
+            yourself.
+    ]
+
+    callee: aCallee [
+        <category: 'setter'>
+        callee := aCallee.
+    ]
+
+    callee [
+        <category: 'getter'>
+        ^callee.
+    ]
+
+    paren: aParen [
+        <category: 'setter'>
+        paren := aParen.
+    ]
+
+    paren [
+        <category: 'getter'>
+        ^paren.
+    ]
+
+    arguments: anArguments [
+        <category: 'setter'>
+        arguments := anArguments.
+    ]
+
+    arguments [
+        <category: 'getter'>
+        ^arguments.
+    ]
+
+    accept: aVisitor [
+        ^aVisitor visitCallExpr: self.
+    ]
+]
+
 Expr subclass: ExprGrouping [
     | expression |
 

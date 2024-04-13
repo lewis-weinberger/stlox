@@ -21,7 +21,8 @@ either running programs from source or providing an interactive interpreter.'>
 
         <category: 'debugging'>
         stderr
-            nextPutAll: '[line ', aLine displayString, '] Error' , aLocation , ': ' , aMessage;
+            nextPutAll: '[line ', aLine displayString ,
+                        '] Error' , aLocation , ': ' , aMessage;
             nl;
             flush.
         hadError := true
@@ -41,7 +42,10 @@ either running programs from source or providing an interactive interpreter.'>
         aToken type = #EOF ifTrue: [
             Lox report: aToken line where: ' at end' message: aMessage.
         ] ifFalse: [
-            Lox report: aToken line where: (' at ''' , aToken lexeme , '''') message: aMessage.
+            Lox
+                report: aToken line
+                where: (' at ''' , aToken lexeme , '''')
+                message: aMessage.
         ]
     ]
 

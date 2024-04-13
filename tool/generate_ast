@@ -22,6 +22,7 @@ class code for different types of node in the Lox abstract syntax tree'>
             base: 'Expr'
             types: #('Assign: name value'
                      'Binary: left operator right'
+                     'Call: callee paren arguments'
                      'Grouping: expression'
                      'Literal: value'
                      'Logical: left operator right'

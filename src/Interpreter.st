@@ -1,5 +1,5 @@
 Object subclass: Interpreter [
-    | environment |
+    | environment globals |
     <comment: 'My instances are evaluators for the Lox programming language.'>
 
     Interpreter class >> new [
@@ -16,7 +16,9 @@ Object subclass: Interpreter [
         "Initialize the interpreter environment"
 
         <category: 'initialization'>
-        environment := Environment new.
+        globals := Environment new.
+        globals define: 'clock' value: Clock new.
+        environment := globals
     ]
 
     interpret: statements [
@@ -299,5 +301,29 @@ Object subclass: Interpreter [
 
         "Unreachable"
         ^nil
+    ]
+
+    visitCallExpr: expr [
+        "Evaluate a functional call expression"
+
+        <category: 'evaluation'>
+        | callee arguments function |
+        callee := self evaluate: (expr callee).
+        (callee isKindOf: Callable) ifFalse: [
+            ^RuntimeError
+                error: (expr paren)
+                message: 'Can only call functions and classes.'
+        ].
+
+        arguments := OrderedCollection new.
+        (expr arguments) do: [ :each | arguments add: (self evaluate: each) ].
+        (arguments size ~= callee arity) ifTrue: [
+            ^RuntimeError
+                error: (expr paren)
+                message: 'Expected ' , callee arity displayString ,
+                         ' arguments but got ' , arguments size displayString , '.'
+        ].
+
+        ^callee call: self arguments: arguments
     ]
 ]
